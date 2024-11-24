@@ -7,6 +7,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,12 +55,13 @@ public class AuctionsController: ControllerBase
         return _mapper.Map<AuctionDTO>(auction);
     }
 
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuctionDTO>> CreateAuction(CreateAuctionDTO createAuctionDTO) {
         var auction = _mapper.Map<Auction>(createAuctionDTO);
-        auction.Seller = "test";
+        auction.Seller =  User.Identity.Name; //"test";
 
         _context.Auctions.Add(auction);
 
@@ -74,6 +76,7 @@ public class AuctionsController: ControllerBase
         return CreatedAtAction(nameof(GetAuctionById), new {auction.Id}, newAuction);
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,6 +87,7 @@ public class AuctionsController: ControllerBase
         
         if (auction  == null) return NotFound();
 
+        if (auction.Seller != User.Identity.Name) return Forbid();
         //todo check seller username
 
         auction.Item.Make = updateAuctionDTO.Make ?? auction.Item.Make;
@@ -101,10 +105,12 @@ public class AuctionsController: ControllerBase
         return BadRequest("dupa123");
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAuction(Guid id) {
         var auction = await _context.Auctions.FirstOrDefaultAsync(x => x.Id == id);  
         if (auction == null) return NotFound();
+        if (auction.Seller != User.Identity.Name) return Forbid();
         _context.Auctions.Remove(auction);
         await _publishEndpoint.Publish(new AuctionDeleted(){Id= auction.Id.ToString()});
         var result = await _context.SaveChangesAsync() > 0; 
