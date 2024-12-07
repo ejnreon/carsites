@@ -22,12 +22,19 @@ builder.Services.AddMassTransit(x=> {
     // x.AddConsumersFromNamespaceContaining<AuctionDeletedConsumer>();
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search",false));
     x.UsingRabbitMq((context,cfg) => {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", cfg => {
+            cfg.Username(builder.Configuration.GetValue("RabbitMq:Username","guest"));
+            cfg.Password(builder.Configuration.GetValue("RabbitMq:Password","guest"));
+        });
+        // cfg.ConfigureEndpoints(context);
+    
         cfg.ReceiveEndpoint("search-auction-created", e => {
             e.UseMessageRetry(r=> {
                 r.Interval(5,5);
             });
             e.ConfigureConsumer<AuctionCreatedConsumer>(context);
         });
+        x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search",false));
         cfg.ConfigureEndpoints(context);
     });
 });

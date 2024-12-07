@@ -1,8 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using AuctionService.Consumers;
 using AuctionService.Data;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +23,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // builder.Services.AddSwaggerGen();
 
 builder.Services.AddMassTransit(x=> {
+
+    x.UsingRabbitMq((context,cfg) => {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", cfg => {
+            cfg.Username(builder.Configuration.GetValue("RabbitMq:Username","guest"));
+            cfg.Password(builder.Configuration.GetValue("RabbitMq:Password","guest"));
+        });
+        cfg.ConfigureEndpoints(context);
+    });
     x.AddEntityFrameworkOutbox<AuctionDbContext>( o => {
         o.QueryDelay = TimeSpan.FromSeconds(10);
         o.UsePostgres();
@@ -26,17 +38,22 @@ builder.Services.AddMassTransit(x=> {
     });
     x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction",false));
-    x.UsingRabbitMq((context,cfg) => {
-        cfg.ConfigureEndpoints(context);
-    });
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options=> {
-        options.Authority = builder.Configuration["IdentityServiceUrl"];
+        // options.Authority = builder.Configuration["IdentityServiceUrl"];
+        options.IncludeErrorDetails = true;
         options.RequireHttpsMetadata = false;
+        options.UseSecurityTokenValidators = false;
         options.TokenValidationParameters.ValidateAudience = false;
-        options.TokenValidationParameters.NameClaimType = "username";        
+        // options.TokenValidationParameters.ValidIssuer = builder.Configuration.GetValue("ValidIssuer","http://localhost:5000");
+        options.TokenValidationParameters.NameClaimType = "username";      
+        // options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("abcdefghi12345"));
+        options.TokenValidationParameters.ValidateIssuer = false;
+        options.TokenValidationParameters.ValidateIssuerSigningKey = false;
+        // options.TokenValidationParameters.auth
+        options.TokenValidationParameters.SignatureValidator = (token,_) => new JsonWebToken(token);
     });
 
 var app = builder.Build();

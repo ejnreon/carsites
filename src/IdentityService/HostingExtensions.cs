@@ -5,6 +5,8 @@ using IdentityService.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace IdentityService;
 
@@ -28,10 +30,16 @@ internal static class HostingExtensions
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
+                if (builder.Environment.IsEnvironment("Docker")) {
+                    options.IssuerUri = "http://localhost:5000";
+
+                    
+                }
 
                 // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                 // options.EmitStaticAudienceClaim = true;
             })
+            // .AddSigningCredential( new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("abcdefghi12345")),"") )
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
