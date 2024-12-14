@@ -53,7 +53,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters.ValidateIssuer = false;
         options.TokenValidationParameters.ValidateIssuerSigningKey = false;
         // options.TokenValidationParameters.auth
-        options.TokenValidationParameters.SignatureValidator = (token,_) => new JsonWebToken(token);
+        options.TokenValidationParameters.SignatureValidator = (token,_) => {
+            // _.va
+            return new JsonWebToken(token);
+        };
     });
 
 var app = builder.Build();

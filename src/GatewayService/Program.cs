@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowSpecificOrigin",builder => {
+        builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+    });
+});
 
 builder.Services.AddAuthentication()
     .AddJwtBearer(options=> {
@@ -30,7 +36,7 @@ builder.Services.AddAuthentication()
 var app = builder.Build();
 
 app.MapReverseProxy();
-
+app.UseCors("AllowSpecificOrigin"); 
 app.UseAuthentication();
 app.UseAuthorization();
 
