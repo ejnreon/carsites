@@ -10,7 +10,11 @@
   },
   "dependencies": {
     "flowbite-react": "^0.10.2",
+    "iron-session": "^8.0.4",
+    "jwt-decode": "^4.0.0",
     "next": "15.0.4",
+    "next-auth": "^5.0.0-beta.25",
+    "next-base64-encoder": "^1.3.0",
     "query-string": "^9.1.1",
     "react": "^19.0.0",
     "react-countdown": "^2.3.6",
@@ -22,10 +26,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^8",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "15.0.4",
     "postcss": "^8",
+    "prettier": "^3.4.2",
+    "prettier-eslint": "^16.3.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^4.9.5"
   }
 }

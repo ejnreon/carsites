@@ -52,6 +52,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseRouting();
+app.UseStaticFiles();
+
 try
 {
     await DbInitializer.InitDb(app);

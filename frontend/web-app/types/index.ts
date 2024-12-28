@@ -23,3 +23,11 @@ export type Auction = {
     imageUrl: string;
     id: string;
 };
+
+
+export interface User {
+    access_token: boolean;
+    id_token: string;
+    refresh_token: string;
+  }
+  
