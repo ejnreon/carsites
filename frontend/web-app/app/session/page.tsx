@@ -1,12 +1,12 @@
 import { auth } from "@/auth";
 import React from "react";
 import Heading from "../components/Heading";
-// import { getAuth } from "@/lib/oidcLib";
+import { getAuth } from "@/lib/oidcLib";
 import AuthTest from "./AuthTest";
 
 export default async function session() {
   const session = await auth();
-  // const oidcSession = await getAuth();
+  const oidcSession = await getAuth();
   return (
     <div>
       <Heading title="Session dashboard" subtitle=""></Heading>
@@ -17,7 +17,7 @@ export default async function session() {
         </pre>
       </div>
       <div className="mg-4 whitespace-pre-wrap break-all">
-        {/* {JSON.stringify(oidcSession, null, 2)} */}
+        {JSON.stringify(oidcSession, null, 2)}
       </div>
 
       <div className="mg-4">

@@ -18,6 +18,9 @@ declare module "next-auth" {
        */
     } & DefaultSession["user"];
   }
+  interface User {
+    username: string;
+  }
   interface Profile {
     username: string;
   }
